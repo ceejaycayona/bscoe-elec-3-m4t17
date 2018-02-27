@@ -2,9 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityStandardAssets.CrossPlatformInput;
+using UnityEngine.SceneManagement;
 
 public class PlayerScript : MonoBehaviour {
 	GameObject rocket;
+	GameObject terrain;
+	Rigidbody _rigidbody;
+	ParticleSystem Explode;
+	AudioSource _audioSource;
+	bool _isSoundPlaying = false;
+
 	[SerializeField] float speed = 100f;
 	[SerializeField]float rotation_Y = 0f;
 	[SerializeField]float rotation_x = 0f;
@@ -15,10 +22,15 @@ public class PlayerScript : MonoBehaviour {
 	[SerializeField]float tiltation = 10f;
 	[SerializeField]float xThrow,yThrow;
 	Vector3 rocketposition;
-
+	Vector3 initialpos;
 	// Use this for initialization
 	void Start () {
 		rocket = GameObject.Find ("PlayerShip");
+		terrain = GameObject.Find ("Terrain");
+		_rigidbody = GetComponent<Rigidbody> ();
+		Explode = GetComponentInChildren<ParticleSystem>();
+		_audioSource = GetComponent<AudioSource> ();
+	//	initialpos = gameObject.transform.position;
 
 	}
 	
@@ -83,4 +95,27 @@ public class PlayerScript : MonoBehaviour {
 
 		transform.localPosition = rocketposition;
 	}
+
+	IEnumerator ExecuteAfterTime(){
+		yield return new WaitForSeconds (1);
+		SceneManager.LoadScene("GameScene");
+
+	}
+
+	private void OnTriggerEnter (Collider collider) {
+		if (!_isSoundPlaying) {
+			_audioSource.Play ();
+			_isSoundPlaying = true;
+		}
+	else {
+		_audioSource.Stop ();
+		_isSoundPlaying = false;
+	}
+
+		print("collide");
+		Explode.Play();
+		StartCoroutine ("ExecuteAfterTime");
+
+	}
+		
 }
